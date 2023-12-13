@@ -5,3 +5,5 @@ readtime==3.0.0
 requests==2.31.0
 django_import_export==3.3.4
 python_dotenv==1.0.0
+dj-database-url==2.1.0
+psycopg[binary]

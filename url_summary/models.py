@@ -10,5 +10,9 @@ class URLSummary(models.Model):
     text = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ("-created_at",)
+        verbose_name = "URL Summary"
+
     def __str__(self) -> str:
         return f"<URLSummary - {self.url}"
