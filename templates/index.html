@@ -8,9 +8,10 @@
     <div class="col-md-6 mx-auto">
         <h3 class="mb-5 text-body-secondary">Summarize any article in a click using AI.</h3>
         <form method="post" action="/" onsubmit="onSubmit()">
+            {% csrf_token %}
             <input type="url" class="form-control" name="url" aria-describedby="URL" placeholder="Enter URL" required>
             <div class="d-grid gap-2 mt-4">
-                <button class="btn btn-primary" type="submit">Get Summary</button>
+                <button class="btn btn-primary" type="submit">Get AI Summary</button>
             </div>
         </form>
 
@@ -37,7 +38,7 @@
             {% endif %}
         </div>
         <div class="mt-5 d-none spinner">
-            <p>Wait a moment! It would take some time to load the page and summarize it.</p>
+            <p class="text-muted">Wait a moment. It would take some time to load the page and summarize it.</p>
             <div class="d-flex flex-row justify-content-center mt-5">
                 <p class="me-5">Generating summary...</p>
                 <div class="spinner-border" role="status">
