@@ -1,3 +1,4 @@
+import os
 from bs4 import BeautifulSoup
 from django.shortcuts import render
 from django.views.generic import View
@@ -71,7 +72,7 @@ class HomePageView(View):
         # TODO: preprocess text for better results
         text = text[:14000]
 
-        client = OpenAI()
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         prompt = (
             "Summarize the following text into {sentence_count} short sentences.\n\n"
             'Text: """{text}""". List each sentence in bullet points.'
