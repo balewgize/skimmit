@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %} Skimmit - AI Summary From URL {% endblock %}
+
+{% block content %}
+
+<div class="row flex-shrink-0">
+    <div class="col-md-6 mx-auto">
+        <h3 class="mb-5 text-body-secondary">Summarize any article in a click using AI.</h3>
+        <form method="post" action="/" onsubmit="onSubmit()">
+            <input type="url" class="form-control" name="url" aria-describedby="URL" placeholder="Enter URL" required>
+            <div class="d-grid gap-2 mt-4">
+                <button class="btn btn-primary" type="submit">Get Summary</button>
+            </div>
+        </form>
+
+        <div class="my-5 welcome">
+            {% if summary %}
+            {% if summary.error %}
+            <p><span class="text-muted">Something went wrong while getting summary. Please try
+                    again or change URL.</span></p>
+            <p><span class="text-muted">It may be due to bot protection or broken URL.</span></p>
+            {% else %}
+            <p><span class="text-muted">Title: </span>{{ summary.title }}</p>
+            <p><span class="text-muted">Read Time: </span> {{ summary.read_time }} min</p>
+            <p class="mb-3 fs-6">Summary:</p>
+            <ul>
+                {% for sentence in summary.sentences %}
+                <li class="my-2">{{ sentence }}</li>
+                {% endfor %}
+            </ul>
+            <a href="{{ summary.url }}" class="my-3" target="_blank">Read more</a>
+            {% endif %}
+            {% else %}
+            <span class="text-muted">No enough time to read long articles? Get instant summaries with just a
+                click! Paste any URL and we'll summarize it for you using AI.</span>
+            {% endif %}
+        </div>
+        <div class="mt-5 d-none spinner">
+            <p>Wait a moment! It would take some time to load the page and summarize it.</p>
+            <div class="d-flex flex-row justify-content-center mt-5">
+                <p class="me-5">Generating summary...</p>
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Generating summary...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
