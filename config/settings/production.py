@@ -20,7 +20,6 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # use PostgreSQL in production
-
 import dj_database_url
 
 DATABASES["default"] = dj_database_url.config(
