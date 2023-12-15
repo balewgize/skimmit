@@ -1,19 +1,54 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
 
 {% block title %} Skimmit - AI Summary From URL {% endblock %}
+
+{% block extra_head %}
+<style>
+    label {
+        display: none;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 
 <div class="row flex-shrink-0">
     <div class="col-md-6 mx-auto">
-        <h3 class="mb-5 text-body-secondary">Summarize any article in a click using AI.</h3>
-        <form method="post" action="/" onsubmit="onSubmit()">
-            {% csrf_token %}
-            <input type="url" class="form-control" name="url" aria-describedby="URL" placeholder="Enter URL" required>
-            <div class="d-grid gap-2 mt-4">
-                <button class="btn btn-primary" type="submit">Get AI Summary</button>
+        <h4 class="mb-5 text-body-secondary">Summarize articles and videos in a click using AI.</h4>
+
+        <ul class="nav nav-pills mb-5" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home"
+                    type="button" role="tab" aria-controls="pills-home" aria-selected="true">Article</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"
+                    type="button" role="tab" aria-controls="pills-profile" aria-selected="false">YouTube Video</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
+                tabindex="0">
+                <form method="post" action="{% url 'url_summary:article' %}" onsubmit="onSubmit()">
+                    {% csrf_token %}
+                    {{ article_form|crispy }}
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-secondary" type="submit">Get Summary</button>
+                    </div>
+                </form>
             </div>
-        </form>
+            <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab"
+                tabindex="0">
+                <form method="post" action="{% url 'url_summary:video' %}" onsubmit="onSubmit()">
+                    {% csrf_token %}
+                    {{ video_form|crispy }}
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-secondary" type="submit">Get Video Summary</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <div class="my-5 welcome">
             {% if summary %}
@@ -33,7 +68,7 @@
             <a href="{{ summary.url }}" class="my-3" target="_blank">Read more</a>
             {% endif %}
             {% else %}
-            <span class="text-muted">No enough time to read long articles? Get instant summaries with just a
+            <span class="text-muted">No enough time for long articles and videos? Get instant summaries with just a
                 click! Paste any URL and we'll summarize it for you using AI.</span>
             {% endif %}
         </div>
