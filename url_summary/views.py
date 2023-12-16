@@ -97,9 +97,16 @@ def get_video_summary(url):
     formatted_transcript = formatter.format_transcript(transcript)
     short_summary = summarize_with_gpt(formatted_transcript)
 
+    response, error = download_page(url)
+    if error or response.status_code != 200:
+        title = "https://www.youtube.com/watch?v=" + video_id
+    else:
+        soup = BeautifulSoup(response.text, "html.parser")
+        title = soup.find("title").text
+
     # save results to DB to retrieve later if a URL is requested again
     summary_obj = URLSummary.objects.create(
-        url=url, summary=short_summary, text=formatted_transcript
+        url=url, title=title, summary=short_summary, text=formatted_transcript
     )
     summary_dict = get_summary_details(summary_obj)
     return summary_dict
