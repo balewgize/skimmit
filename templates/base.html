@@ -15,14 +15,14 @@
 <body class="d-flex flex-column min-vh-100">
     <main class="flex-shrink-0">
         <div class="container">
-            <header class="d-flex justify-content-center align-items-center py-3 mb-4 border-bottom">
-                <a href="/" class="d-flex align-items-center me-md-auto link-body-emphasis text-decoration-none">
+            <header class="d-flex justify-content-between align-items-center py-3 mb-4 border-bottom">
+                <a href="/" class="d-flex align-items-center link-body-emphasis text-decoration-none">
                     <span class="fs-4 ms-3">Skimmit</span>
                 </a>
                 <ul class="nav nav-pills">
-                    <li class="nav-item ms-3">
-                        <span id="theme-switch" style="cursor: pointer;"><i
-                                class="bi bi-brightness-high-fill"></i></span>
+                    <li class="nav-item me-4">
+                        <span id="theme-switch" style="cursor: pointer;">
+                            <i class="bi bi-brightness-high-fill"></i></span>
                     </li>
                 </ul>
             </header>
@@ -72,11 +72,7 @@
             const currentTheme = html.getAttribute("data-bs-theme")
             let newTheme;
 
-            if (currentTheme === 'light') {
-                newTheme = 'dark';
-            } else {
-                newTheme = 'light';
-            }
+            newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
             html.setAttribute("data-bs-theme", newTheme);
             localStorage.setItem('theme', newTheme);

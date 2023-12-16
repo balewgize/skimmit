@@ -51,17 +51,6 @@
                 </div>
             </div>
 
-            {% comment %}
-            <form method="post" action="/" onsubmit="onSubmit()">
-                {% csrf_token %}
-                <input type="url" class="form-control" name="url" aria-describedby="URL" placeholder="Enter URL"
-                    required>
-                <div class="d-grid gap-2 mt-4">
-                    <button class="btn btn-primary" type="submit">Get AI Summary</button>
-                </div>
-            </form>
-            {% endcomment %}
-
             <div class="my-5 welcome">
                 {% if summary %}
                 {% if summary.error %}
@@ -69,10 +58,9 @@
                         again or change URL.</span></p>
                 <p><span class="text-muted">It may be due to bot protection or broken URL.</span></p>
                 {% else %}
-                <p><span class="text-muted"></span>
-                    <a href="{{ summary.url }}" class="my-3 text-decoration-none" target="_blank"><i
-                            class="bi bi-youtube mx-2 text-danger"></i> Watch on
-                        YouTube</a>
+                <p><span class="text-muted"><i class="bi bi-youtube mx-2 text-danger"></i> Watch: </span>
+                    <a href="{{ summary.url }}" class="my-3 text-decoration-none" target="_blank">
+                        {{ summary.title }}</a>
                 </p>
                 <p><span class="text-muted"><i class="bi bi-clock mx-2"></i> Watch Time: </span> {{ summary.read_time }}
                     min</p>
@@ -85,13 +73,12 @@
                 </ul>
                 {% endif %}
                 {% else %}
-                <span class="text-muted">No enough time to read long articles or watch videos? Get instant summaries
-                    with just a
+                <span class="text-muted">No enough time for long articles and videos? Get instant summaries with just a
                     click! Paste any URL and we'll summarize it for you using AI.</span>
                 {% endif %}
             </div>
             <div class="mt-5 d-none spinner">
-                <p class="text-muted">Wait a moment. It would take some time to load the page and summarize it.</p>
+                <p class="text-muted">Wait a moment. It would take some time to load the URL and summarize it.</p>
                 <div class="d-flex flex-row justify-content-center mt-5">
                     <p class="me-5">Generating summary...</p>
                     <div class="spinner-border" role="status">
