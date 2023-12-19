@@ -1,8 +1,8 @@
 import os
 import readtime
+import google.generativeai as genai
 from bs4 import BeautifulSoup
 from django.shortcuts import redirect, render
-from django.views.generic import View
 from openai import OpenAI
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
@@ -10,6 +10,9 @@ from youtube_transcript_api.formatters import TextFormatter
 from .forms import ArticleURLForm, VideoURLForm
 from .models import URLSummary
 from .utils.downloader import download_page
+
+
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 
 def home(request):
@@ -67,7 +70,8 @@ def get_article_summary(url):
     soup = BeautifulSoup(response.text, "html.parser")
     article_text = soup.find("body").get_text()
     title = soup.find("title").text
-    short_summary = summarize_with_gpt(article_text)
+    short_summary = summarize_with_gpt(article_text, source="article")
+    # short_summary = summarize_with_gemini(article_text, source="article")
 
     # save results to DB to retrieve later if a URL is requested again
     summary_obj = URLSummary.objects.create(
@@ -95,7 +99,8 @@ def get_video_summary(url):
 
     formatter = TextFormatter()
     formatted_transcript = formatter.format_transcript(transcript)
-    short_summary = summarize_with_gpt(formatted_transcript)
+    short_summary = summarize_with_gpt(formatted_transcript, source="video")
+    # short_summary = summarize_with_gemini(formatted_transcript, source="video")
 
     response, error = download_page(url)
     if error or response.status_code != 200:
@@ -130,25 +135,49 @@ def get_summary_details(summary_obj: URLSummary) -> dict:
     return summary
 
 
-def summarize_with_gpt(text: str, sentence_count: int = 5) -> str:
+def summarize_with_gpt(text: str, sentence_count: int = 5, source: str = "text") -> str:
     """
     Summarize text into short sentences using GPT-3.5 model.
     """
-    # TODO: preprocess text for better results
     text = text[:14000]
 
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    prompt = (
-        "Summarize the following text into {sentence_count} short sentences.\n\n"
-        'Text: """{text}""". List each sentence in bullet points.'
-    )
-    prompt = prompt.format(text=text, sentence_count=sentence_count)
+    # prompt = (
+    #     "Summarize the following text into {sentence_count} short sentences.\n\n"
+    #     'Text: """{text}""". List each sentence in bullet points.'
+    # )
 
-    # TODO: handle api call failure, if any
+    prompt = (
+        "In just {sentence_count} sentences, capture the heart of the {source} below. "
+        "Highlight what it's about, who it's for, and why it might be interesting.\n\n"
+        "Text: {text}. List each sentence in bullet points."
+    )
+    prompt = prompt.format(text=text, sentence_count=sentence_count, source=source)
+
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         seed=34267,
     )
     summary = completion.choices[0].message.content
+    return summary
+
+
+def summarize_with_gemini(text: str, sentence_count: int = 5, source: str = "text"):
+    """
+    Summarize text into short sentences using Gemini Pro model.
+    """
+    text = text[:14000]
+
+    prompt = (
+        "In just {sentence_count} sentences, capture the heart of the {source} below. "
+        "Highlight what it's about, who it's for, and why it might be interesting.\n\n"
+        "Text: {text}. List each sentence in bullet points."
+    )
+    prompt = prompt.format(text=text, sentence_count=sentence_count, source=source)
+
+    model = genai.GenerativeModel("gemini-pro")
+    response = model.generate_content(prompt)
+    summary = response.text
+
     return summary
