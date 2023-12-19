@@ -12,3 +12,4 @@ whitenoise==6.6.0
 youtube_transcript_api==0.6.1
 django_crispy_forms==2.1
 crispy-bootstrap5==2023.10
+google-generativeai
