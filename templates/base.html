@@ -15,13 +15,33 @@
 <body class="d-flex flex-column min-vh-100">
     <main class="flex-shrink-0">
         <div class="container">
-            <header class="d-flex justify-content-between align-items-center py-3 mb-4 border-bottom">
+            <header class="d-flex justify-content-between align-items-center py-2 mb-4 border-bottom">
                 <a href="/" class="d-flex align-items-center link-body-emphasis text-decoration-none">
                     <span class="fs-4 ms-3">Skimmit</span>
                 </a>
                 <ul class="nav nav-pills">
-                    <li class="nav-item me-4">
-                        <span id="theme-switch" style="cursor: pointer;">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link link-body-emphasis dropdown-toggle" href="#" data-bs-toggle="dropdown"
+                            aria-expanded="false">Account</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="bi bi-person me-2"></i>My Summary</a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:preferences' %}">
+                                    <i class="bi bi-gear me-2"></i>Preferences</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'account_logout' %}">
+                                    <i class="bi bi-arrow-right-short me-2"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'account_login' %}" class="nav-link">Login</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item mx-2">
+                        <span id="theme-switch" class="nav-link link-body-emphasis" style="cursor: pointer;">
                             <i class="bi bi-brightness-high-fill"></i></span>
                     </li>
                 </ul>
