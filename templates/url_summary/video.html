@@ -52,22 +52,32 @@
             </div>
 
             <div class="my-5 welcome">
-                {% if summary %}
-                {% if summary.error %}
+                {% if result %}
+                {% if result.error %}
                 <p><span class="text-muted">Something went wrong while getting summary. Please try
                         again or change URL.</span></p>
                 <p><span class="text-muted">It may be due to bot protection or broken URL.</span></p>
                 {% else %}
                 <p><span class="text-muted"><i class="bi bi-youtube mx-2 text-danger"></i> Watch: </span>
-                    <a href="{{ summary.url }}" class="my-3 text-decoration-none" target="_blank">
-                        {{ summary.title }}</a>
+                    <a href="{{ result.url }}" class="my-3 text-decoration-none" target="_blank">
+                        {{ result.title }}</a>
                 </p>
-                <p><span class="text-muted"><i class="bi bi-clock mx-2"></i> Watch Time: </span> {{ summary.read_time }}
+                <p><span class="text-muted"><i class="bi bi-clock mx-2"></i> Watch Time: </span> {{ result.read_time }}
                     min</p>
-                <p class="mb-3 fs-6"><span class="text-muted"><i class="bi bi-file-earmark-text mx-2"></i>
-                        Summary:</span></p>
+                <div class="d-flex justify-content-between">
+                    <p class="mb-3 fs-6"><span class="text-muted"><i class="bi bi-file-earmark-text mx-2"></i>
+                            Summary:</span></p>
+
+                    {% if request.user in result.summary.bookmarks.all %}
+                    <a href="#" class="bookmark" data-id="{{ result.summary.id }}" data-action="unsave" title="Bookmark"
+                        style="cursor: pointer;"><i class="bi bi-bookmark-fill"></i></a>
+                    {% else %}
+                    <a href="#" class="bookmark" data-id="{{ result.summary.id }}" data-action="save" title="Bookmark"
+                        style="cursor: pointer;"><i class="bi bi-bookmark"></i></a>
+                    {% endif %}
+                </div>
                 <ul>
-                    {% for sentence in summary.sentences %}
+                    {% for sentence in result.sentences %}
                     <li class="my-2">{{ sentence }}</li>
                     {% endfor %}
                 </ul>
@@ -90,3 +100,7 @@
 </div>
 
 {% endblock content %}
+
+{% block domready %}
+{% include "url_summary/domready.html" %}
+{% endblock %}

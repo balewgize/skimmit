@@ -1,8 +1,11 @@
 import os
+from django.http import JsonResponse
 import readtime
 import google.generativeai as genai
 from bs4 import BeautifulSoup
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.http import require_POST
 from openai import OpenAI
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
@@ -26,7 +29,7 @@ def article_summary(request):
         if form.is_valid():
             url = form.cleaned_data["url"]
             summary = get_article_summary(url)
-            context = {"summary": summary, "article_form": ArticleURLForm()}
+            context = {"result": summary, "article_form": ArticleURLForm()}
         else:
             context = {"article_form": form}
 
@@ -42,7 +45,7 @@ def video_summary(request):
         if form.is_valid():
             url = form.cleaned_data["url"]
             summary = get_video_summary(url)
-            context = {"summary": summary, "video_form": VideoURLForm()}
+            context = {"result": summary, "video_form": VideoURLForm()}
         else:
             context = {"video_form": form}
 
@@ -121,18 +124,19 @@ def get_summary_details(summary_obj: URLSummary) -> dict:
     """
     Generate dictionary with summary details.
     """
-    summary = {}
+    result = {}
     read_time = readtime.of_text(summary_obj.text).minutes
     short_summary = summary_obj.summary
     # format summary into list of sentences for readability
     sentences = [s.strip() for s in short_summary.split("- ") if s.strip()]
 
-    summary["sentences"] = sentences
-    summary["title"] = summary_obj.title
-    summary["read_time"] = read_time
-    summary["url"] = summary_obj.url
+    result["sentences"] = sentences
+    result["title"] = summary_obj.title
+    result["read_time"] = read_time
+    result["url"] = summary_obj.url
+    result["summary"] = summary_obj
 
-    return summary
+    return result
 
 
 def summarize_with_gpt(text: str, sentence_count: int = 5, source: str = "text") -> str:
@@ -181,3 +185,24 @@ def summarize_with_gemini(text: str, sentence_count: int = 5, source: str = "tex
     summary = response.text
 
     return summary
+
+
+@login_required
+@require_POST
+def bookmark_summary(request):
+    """
+    Add or remove summary from user's bookmarks.
+    """
+    summary_id = request.POST.get("id")
+    action = request.POST.get("action")
+    if summary_id and action:
+        try:
+            summary = get_object_or_404(URLSummary, id=summary_id)
+            if action == "save":
+                summary.bookmarks.add(request.user)
+            else:
+                summary.bookmarks.remove(request.user)
+            return JsonResponse({"status": "ok"})
+        except:
+            pass
+    return JsonResponse({"status": "error"})

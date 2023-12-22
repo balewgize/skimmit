@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 class URLSummary(models.Model):
@@ -9,6 +10,11 @@ class URLSummary(models.Model):
     summary = models.TextField(blank=True)
     text = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    bookmarks = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="bookmarked_summaries",
+        blank=True,
+    )
 
     class Meta:
         ordering = ("-created_at",)
