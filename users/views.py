@@ -20,10 +20,10 @@ def preferences(request):
     if user_prefrence:
         context = {
             "ai_model": user_prefrence.ai_model,
-            "sentence_length": user_prefrence.sentence_length,
+            "sentence_count": user_prefrence.sentence_count,
         }
     else:
-        context = {"ai_model": "gpt-3.5-turbo", "sentence_length": 5}
+        context = {"ai_model": "gpt-3.5-turbo", "sentence_count": 5}
     return render(request, "users/preferences.html", context)
 
 
@@ -34,7 +34,7 @@ def preference_update(request):
         if form.is_valid():
             preference, _ = Preference.objects.get_or_create(user=request.user)
             preference.ai_model = form.cleaned_data["ai_model"]
-            preference.sentence_length = form.cleaned_data["sentence_length"]
+            preference.sentence_count = form.cleaned_data["sentence_count"]
             preference.save()
             return redirect("users:preferences")
     else:
