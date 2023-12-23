@@ -15,77 +15,90 @@
 
 <div class="row flex-shrink-0">
     <div class="col-md-6 mx-auto">
-        <h4 class="mb-5 text-body-secondary">Summarize articles and videos in a click using AI.</h3>
-
-            <ul class="nav nav-pills mb-5" id="pills-tab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill"
-                        data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home"
-                        aria-selected="true">Article</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill"
-                        data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile"
-                        aria-selected="false">YouTube Video</button>
-                </li>
-            </ul>
-            <div class="tab-content" id="pills-tabContent">
-                <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
-                    tabindex="0">
-                    <form method="post" action="{% url 'url_summary:article' %}" onsubmit="onSubmit()">
-                        {% csrf_token %}
-                        {{ article_form|crispy }}
-                        <div class="d-grid gap-2 mt-4">
-                            <button class="btn btn-secondary" type="submit">Get Summary</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab"
-                    tabindex="0">
-                    <form method="post" action="{% url 'url_summary:video' %}" onsubmit="onSubmit()">
-                        {% csrf_token %}
-                        {{ video_form|crispy }}
-                        <div class="d-grid gap-2 mt-4">
-                            <button class="btn btn-secondary" type="submit">Get Video Summary</button>
-                        </div>
-                    </form>
-                </div>
+        {% if not request.user.is_authenticated %}
+        <h3 class="text-body-secondary">Summarize articles and videos in a click using AI.</h3>
+        {% endif %}
+        <ul class="nav nav-pills mb-5 mt-4" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home"
+                    type="button" role="tab" aria-controls="pills-home" aria-selected="true">Article</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"
+                    type="button" role="tab" aria-controls="pills-profile" aria-selected="false">YouTube Video</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
+                tabindex="0">
+                <form method="post" action="{% url 'url_summary:article' %}" onsubmit="onSubmit()">
+                    {% csrf_token %}
+                    {{ article_form|crispy }}
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-secondary" type="submit">Get Summary</button>
+                    </div>
+                </form>
             </div>
+            <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab"
+                tabindex="0">
+                <form method="post" action="{% url 'url_summary:video' %}" onsubmit="onSubmit()">
+                    {% csrf_token %}
+                    {{ video_form|crispy }}
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-secondary" type="submit">Get Video Summary</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-            <div class="my-5 welcome">
-                {% if summary %}
-                {% if summary.error %}
-                <p><span class="text-muted">Something went wrong while getting summary. Please try
-                        again or change URL.</span></p>
-                <p><span class="text-muted">It may be due to bot protection or broken URL.</span></p>
-                {% else %}
-                <p>{{ summary.title }}</p>
-                <p><span class="text-muted"><i class="bi bi-clock mx-2"></i> Read Time: </span> {{ summary.read_time }}
-                    min</p>
+        <div class="my-5 welcome">
+            {% if result %}
+            {% if result.error %}
+            <p><span class="text-muted">Something went wrong while getting summary. Please try
+                    again or change URL.</span></p>
+            <p><span class="text-muted">It may be due to bot protection or broken URL.</span></p>
+            {% else %}
+            <p>{{ result.title }}</p>
+            <p><span class="text-muted"><i class="bi bi-clock mx-2"></i> Read Time: </span> {{ result.read_time }}
+                min</p>
+            <div class="d-flex justify-content-between">
                 <p class="mb-3 fs-6"><span class="text-muted"><i class="bi bi-file-earmark-text mx-2"></i>
                         Summary:</span></p>
-                <ul>
-                    {% for sentence in summary.sentences %}
-                    <li class="my-2">{{ sentence }}</li>
-                    {% endfor %}
-                </ul>
-                <a href="{{ summary.url }}" class="my-3" target="_blank">Read more</a>
-                {% endif %}
+
+                {% if request.user in result.summary.bookmarks.all %}
+                <a href="#" class="bookmark" data-id="{{ result.summary.id }}" data-action="unsave" title="Bookmark"
+                    style="cursor: pointer;"><i class="bi bi-bookmark-fill"></i></a>
                 {% else %}
-                <span class="text-muted">No enough time for long articles and videos? Get instant summaries with just a
-                    click! Paste any URL and we'll summarize it for you using AI.</span>
+                <a href="#" class="bookmark" data-id="{{ result.summary.id }}" data-action="save" title="Bookmark"
+                    style="cursor: pointer;"><i class="bi bi-bookmark"></i></a>
                 {% endif %}
             </div>
-            <div class="mt-5 d-none spinner">
-                <p class="text-muted">Wait a moment. It would take some time to load the URL and summarize it.</p>
-                <div class="d-flex flex-row justify-content-center mt-5">
-                    <p class="me-5">Generating summary...</p>
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Generating summary...</span>
-                    </div>
+            <ul>
+                {% for sentence in result.sentences %}
+                <li class="my-2">{{ sentence }}</li>
+                {% endfor %}
+            </ul>
+            <a href="{{ result.url }}" class="my-3" target="_blank">Read more</a>
+            {% endif %}
+            {% else %}
+            <span class="text-muted">No enough time for long articles and videos? Get instant summaries with just a
+                click! Paste any URL and we'll summarize it for you using AI.</span>
+            {% endif %}
+        </div>
+        <div class="mt-5 d-none spinner">
+            <p class="text-muted">Wait a moment. It would take some time to load the URL and summarize it.</p>
+            <div class="d-flex flex-row justify-content-center mt-5">
+                <p class="me-5">Generating summary...</p>
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Generating summary...</span>
                 </div>
             </div>
+        </div>
     </div>
 </div>
 
 {% endblock content %}
+
+{% block domready %}
+{% include "url_summary/domready.html" %}
+{% endblock %}

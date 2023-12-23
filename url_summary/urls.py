@@ -9,4 +9,5 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("article/", views.article_summary, name="article"),
     path("video/", views.video_summary, name="video"),
+    path("bookmark/", views.bookmark_summary, name="bookmark"),
 ]
