@@ -5,7 +5,7 @@
 <div align="center">
   <h3 align="center">Skimmit</h3>
   <p align="center">
-    Article and YouTube video summary from URL, powered by GPT-3.5
+    Article and YouTube video summary from URL, powered by GPT-3.5 & Gemini Pro
     <br />
     <a href="https://skimmit.onrender.com/">View Demo</a>
   </p>
@@ -26,7 +26,7 @@ The AI summaries powered by GPT-3.5 save you valuable time, making information c
 
 **Informed Choices**: Preview articles and videos before committing. Know what's inside and make informed decisions about what to read and watch. 
 
-This will be helpful when there are dozen of articles and videos on the subject you're interested in but not sure which one to pick.
+This will be helpful when there are dozens of articles and videos on the subject you're interested in but not sure which one to pick.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -35,18 +35,23 @@ This will be helpful when there are dozen of articles and videos on the subject 
 
 * Article summary from URL
 * YouTube video summary from URL
-* Uses LLM (GPT-3.5) for summarization 
+* LLM for summarization: ```GPT-3.5``` & ```Gemini Pro``` 
+* User preference: LLM model choice and summary length 
+* Bookmark summaries for later reading
 * Dark/Light theme
-* More features to come...
 
+If you don't want to create an account, you can use the following guest credentials.
+
+Email: ```guest@example.com``` <br>
+Password: ```welc0me2```
 
 <!-- What tech stack you use to develop the project? -->
 ### Built With
 
 * Python
 * Django
-* LLM (GPT-3.5)
-* PostgreSQL
+* LLM (GPT-3.5, Gemini Pro)
+* Bootstrap
 * Render
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -62,8 +67,9 @@ To get a local copy up and running follow these example steps.
 ### Prerequisites
 
 * Python installed
-* OpenAI account
-
+* OpenAI API key
+* Gemini Pro API key
+* Email service (or setting up Google app password for your Gmail)
 
 ### Installation
 
@@ -86,6 +92,11 @@ To get a local copy up and running follow these example steps.
    DATABASE_URL= (managed PostgreSQL, optional)
 
    OPENAI_API_KEY=
+   GOOGLE_API_KEY=
+
+   EMAIL_HOST=
+   EMAIL_HOST_USER=
+   EMAIL_HOST_PASSWORD=
    ```
 
 4. Apply migrations and start the server. The server starts in production settings by default.
