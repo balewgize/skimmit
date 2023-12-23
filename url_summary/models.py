@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 
+from users.models import Preference
+
 
 class URLSummary(models.Model):
     """A class representing URL summary results."""
@@ -14,6 +16,9 @@ class URLSummary(models.Model):
         settings.AUTH_USER_MODEL,
         related_name="bookmarked_summaries",
         blank=True,
+    )
+    ai_model = models.CharField(
+        max_length=20, choices=Preference.AIModels.choices, blank=True, null=True
     )
 
     class Meta:

@@ -8,6 +8,6 @@ from .models import URLSummary
 class URLSummaryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     """Admin View for URL Summary."""
 
-    list_display = ("url", "title", "created_at")
+    list_display = ("url", "title", "ai_model", "created_at")
     search_fields = ("url", "title")
-    list_filter = ("created_at",)
+    list_filter = ("ai_model", "created_at")

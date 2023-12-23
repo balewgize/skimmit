@@ -4,12 +4,13 @@ import readtime
 import google.generativeai as genai
 from bs4 import BeautifulSoup
 from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from openai import OpenAI
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
 
+from users.models import Preference
 from .forms import ArticleURLForm, VideoURLForm
 from .models import URLSummary
 from .utils.downloader import download_page
@@ -28,7 +29,8 @@ def article_summary(request):
         form = ArticleURLForm(request.POST)
         if form.is_valid():
             url = form.cleaned_data["url"]
-            summary = get_article_summary(url)
+            user_preference, _ = Preference.objects.get_or_create(user=request.user)
+            summary = get_article_summary(url, user_preference)
             context = {"result": summary, "article_form": ArticleURLForm()}
         else:
             context = {"article_form": form}
@@ -44,7 +46,8 @@ def video_summary(request):
         form = VideoURLForm(request.POST)
         if form.is_valid():
             url = form.cleaned_data["url"]
-            summary = get_video_summary(url)
+            user_preference, _ = Preference.objects.get_or_create(user=request.user)
+            summary = get_video_summary(url, user_preference)
             context = {"result": summary, "video_form": VideoURLForm()}
         else:
             context = {"video_form": form}
@@ -55,7 +58,7 @@ def video_summary(request):
         return redirect("url_summary:home")
 
 
-def get_article_summary(url):
+def get_article_summary(url: str, user_preference: Preference):
     """
     Summarize articles by extracting HTML body text.
     """
@@ -73,18 +76,31 @@ def get_article_summary(url):
     soup = BeautifulSoup(response.text, "html.parser")
     article_text = soup.find("body").get_text()
     title = soup.find("title").text
-    short_summary = summarize_with_gpt(article_text, source="article")
-    # short_summary = summarize_with_gemini(article_text, source="article")
+
+    ai_model = user_preference.ai_model
+    sentence_count = user_preference.sentence_count
+    if ai_model == "gpt-3.5-turbo":
+        short_summary = summarize_with_gpt(
+            article_text, sentence_count, source="article"
+        )
+    else:
+        short_summary = summarize_with_gemini(
+            article_text, sentence_count, source="article"
+        )
 
     # save results to DB to retrieve later if a URL is requested again
     summary_obj = URLSummary.objects.create(
-        url=url, title=title, summary=short_summary, text=article_text
+        url=url,
+        title=title,
+        summary=short_summary,
+        text=article_text,
+        ai_model=ai_model,
     )
     summary_dict = get_summary_details(summary_obj)
     return summary_dict
 
 
-def get_video_summary(url):
+def get_video_summary(url: str, user_preference: Preference):
     """
     Summarize YouTube videos by extracting transcript.
     """
@@ -102,8 +118,17 @@ def get_video_summary(url):
 
     formatter = TextFormatter()
     formatted_transcript = formatter.format_transcript(transcript)
-    short_summary = summarize_with_gpt(formatted_transcript, source="video")
-    # short_summary = summarize_with_gemini(formatted_transcript, source="video")
+
+    ai_model = user_preference.ai_model
+    sentence_count = user_preference.sentence_count
+    if ai_model == "gpt-3.5-turbo":
+        short_summary = summarize_with_gpt(
+            formatted_transcript, sentence_count, source="video"
+        )
+    else:
+        short_summary = summarize_with_gemini(
+            formatted_transcript, sentence_count, source="video"
+        )
 
     response, error = download_page(url)
     if error or response.status_code != 200:
@@ -114,7 +139,11 @@ def get_video_summary(url):
 
     # save results to DB to retrieve later if a URL is requested again
     summary_obj = URLSummary.objects.create(
-        url=url, title=title, summary=short_summary, text=formatted_transcript
+        url=url,
+        title=title,
+        summary=short_summary,
+        text=formatted_transcript,
+        ai_model=ai_model,
     )
     summary_dict = get_summary_details(summary_obj)
     return summary_dict
