@@ -1,6 +1,20 @@
 {% extends "base.html" %}
 
+{% block title %} Preferences {% endblock %}
+
 {% block content %}
-<h1>Preferences</h1>
-<p>User preferces: Model choice, sentence length etc.</p>
+<div class="col-lg-4 mx-auto">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="">My preferences</h4>
+        <a href="{% url 'users:preference_update' %}"><i class="bi bi-pencil-square"></i></a>
+    </div>
+    <p class="d-flex justify-content-between">
+        <span class="text-muted">AI Model:</span>
+        <span>{{ model_choice }}</span>
+    </p>
+    <p class="d-flex justify-content-between">
+        <span class="text-muted">Sentence Length:</span>
+        <span>{{ sentence_length }}</span>
+    </p>
+</div>
 {% endblock %}

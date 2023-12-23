@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import User
+from .models import User, Preference
 
 
 class CustomUserAdmin(UserAdmin):
@@ -9,3 +9,9 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(User, CustomUserAdmin)
+
+
+@admin.register(Preference)
+class PreferenceAdmin(admin.ModelAdmin):
+    list_display = ["user", "model_choice", "sentence_length"]
+    list_filter = ["model_choice"]

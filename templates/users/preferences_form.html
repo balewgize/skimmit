@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %} Update Preferences {% endblock %}
+
+{% block content %}
+<div class="col-lg-4 mx-auto">
+    <h4 class="my-4">Update preferences</h4>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <input class="btn btn-secondary mt-3" type="submit" value="Update">
+    </form>
+</div>
+{% endblock %}
