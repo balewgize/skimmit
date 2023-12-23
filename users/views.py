@@ -19,11 +19,11 @@ def preferences(request):
     user_prefrence = Preference.objects.filter(user=request.user).first()
     if user_prefrence:
         context = {
-            "model_choice": user_prefrence.model_choice,
+            "ai_model": user_prefrence.ai_model,
             "sentence_length": user_prefrence.sentence_length,
         }
     else:
-        context = {"model_choice": "gpt-3.5-turbo", "sentence_length": 5}
+        context = {"ai_model": "gpt-3.5-turbo", "sentence_length": 5}
     return render(request, "users/preferences.html", context)
 
 
@@ -33,7 +33,7 @@ def preference_update(request):
         form = PreferenceForm(request.POST)
         if form.is_valid():
             preference, _ = Preference.objects.get_or_create(user=request.user)
-            preference.model_choice = form.cleaned_data["model_choice"]
+            preference.ai_model = form.cleaned_data["ai_model"]
             preference.sentence_length = form.cleaned_data["sentence_length"]
             preference.save()
             return redirect("users:preferences")

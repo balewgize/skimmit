@@ -15,7 +15,7 @@ class Preference(models.Model):
     SENTENCE_LENGTH_CHOICES = tuple(zip(range(3, 11), range(3, 11)))
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    model_choice = models.CharField(
+    ai_model = models.CharField(
         max_length=20, choices=AIModels, default=AIModels.GPT_3_5
     )
     sentence_length = models.IntegerField(default=5, choices=SENTENCE_LENGTH_CHOICES)

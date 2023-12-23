@@ -13,5 +13,5 @@ admin.site.register(User, CustomUserAdmin)
 
 @admin.register(Preference)
 class PreferenceAdmin(admin.ModelAdmin):
-    list_display = ["user", "model_choice", "sentence_length"]
-    list_filter = ["model_choice"]
+    list_display = ["user", "ai_model", "sentence_length"]
+    list_filter = ["ai_model"]
