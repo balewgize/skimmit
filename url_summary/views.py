@@ -29,7 +29,10 @@ def article_summary(request):
         form = ArticleURLForm(request.POST)
         if form.is_valid():
             url = form.cleaned_data["url"]
-            user_preference, _ = Preference.objects.get_or_create(user=request.user)
+            if request.user.is_authenticated:
+                user_preference, _ = Preference.objects.get_or_create(user=request.user)
+            else:
+                user_preference = None
             summary = get_article_summary(url, user_preference)
             context = {"result": summary, "article_form": ArticleURLForm()}
         else:
@@ -46,7 +49,10 @@ def video_summary(request):
         form = VideoURLForm(request.POST)
         if form.is_valid():
             url = form.cleaned_data["url"]
-            user_preference, _ = Preference.objects.get_or_create(user=request.user)
+            if request.user.is_authenticated:
+                user_preference, _ = Preference.objects.get_or_create(user=request.user)
+            else:
+                user_preference = None
             summary = get_video_summary(url, user_preference)
             context = {"result": summary, "video_form": VideoURLForm()}
         else:
@@ -77,8 +83,13 @@ def get_article_summary(url: str, user_preference: Preference):
     article_text = soup.find("body").get_text()
     title = soup.find("title").text
 
-    ai_model = user_preference.ai_model
-    sentence_count = user_preference.sentence_count
+    if user_preference is None:
+        ai_model = "gpt-3.5-turbo"
+        sentence_count = 5
+    else:
+        ai_model = user_preference.ai_model
+        sentence_count = user_preference.sentence_count
+
     if ai_model == "gpt-3.5-turbo":
         short_summary = summarize_with_gpt(
             article_text, sentence_count, source="article"
@@ -119,8 +130,13 @@ def get_video_summary(url: str, user_preference: Preference):
     formatter = TextFormatter()
     formatted_transcript = formatter.format_transcript(transcript)
 
-    ai_model = user_preference.ai_model
-    sentence_count = user_preference.sentence_count
+    if user_preference is None:
+        ai_model = "gpt-3.5-turbo"
+        sentence_count = 5
+    else:
+        ai_model = user_preference.ai_model
+        sentence_count = user_preference.sentence_count
+
     if ai_model == "gpt-3.5-turbo":
         short_summary = summarize_with_gpt(
             formatted_transcript, sentence_count, source="video"
