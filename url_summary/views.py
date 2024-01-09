@@ -1,4 +1,5 @@
 import os
+import json
 from django.http import JsonResponse
 import readtime
 import google.generativeai as genai
@@ -9,6 +10,7 @@ from django.views.decorators.http import require_POST
 from openai import OpenAI
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
+from pytube import YouTube
 
 from users.models import Preference
 from .forms import ArticleURLForm, VideoURLForm
@@ -91,19 +93,21 @@ def get_article_summary(url: str, user_preference: Preference):
         sentence_count = user_preference.sentence_count
 
     if ai_model == "gpt-3.5-turbo":
-        short_summary = summarize_with_gpt(
-            article_text, sentence_count, source="article"
-        )
+        ai_summary = summarize_with_gpt(article_text, sentence_count, source="article")
     else:
-        short_summary = summarize_with_gemini(
+        ai_summary = summarize_with_gemini(
             article_text, sentence_count, source="article"
         )
+
+    if not ai_summary:
+        summary_dict["error"] = True
+        return summary_dict
 
     # save results to DB to retrieve later if a URL is requested again
     summary_obj = URLSummary.objects.create(
         url=url,
         title=title,
-        summary=short_summary,
+        summary=ai_summary,
         text=article_text,
         ai_model=ai_model,
     )
@@ -138,26 +142,23 @@ def get_video_summary(url: str, user_preference: Preference):
         sentence_count = user_preference.sentence_count
 
     if ai_model == "gpt-3.5-turbo":
-        short_summary = summarize_with_gpt(
+        ai_summary = summarize_with_gpt(
             formatted_transcript, sentence_count, source="video"
         )
     else:
-        short_summary = summarize_with_gemini(
+        ai_summary = summarize_with_gemini(
             formatted_transcript, sentence_count, source="video"
         )
 
-    response, error = download_page(url)
-    if error or response.status_code != 200:
-        title = "https://www.youtube.com/watch?v=" + video_id
-    else:
-        soup = BeautifulSoup(response.text, "html.parser")
-        title = soup.find("title").text
+    if not ai_summary:
+        summary_dict["error"] = True
+        return summary_dict
 
     # save results to DB to retrieve later if a URL is requested again
     summary_obj = URLSummary.objects.create(
         url=url,
-        title=title,
-        summary=short_summary,
+        title="",  # title will be set later
+        summary=ai_summary,
         text=formatted_transcript,
         ai_model=ai_model,
     )
@@ -170,15 +171,27 @@ def get_summary_details(summary_obj: URLSummary) -> dict:
     Generate dictionary with summary details.
     """
     result = {}
-    read_time = readtime.of_text(summary_obj.text).minutes
-    short_summary = summary_obj.summary
+    url = summary_obj.url
+
+    if "youtube.com" in url:
+        yt = YouTube(url)
+        read_time = yt.length // 60  # watch time in minutes
+        summary_obj.title = yt.title
+        summary_obj.save()
+    else:
+        read_time = readtime.of_text(summary_obj.text).minutes
+
     # format summary into list of sentences for readability
-    sentences = [s.strip() for s in short_summary.split("- ") if s.strip()]
+    try:
+        summary = json.loads(summary_obj.summary)
+        sentences = summary["sentences"]
+    except Exception as e:
+        sentences = []
 
     result["sentences"] = sentences
     result["title"] = summary_obj.title
     result["read_time"] = read_time
-    result["url"] = summary_obj.url
+    result["url"] = url
     result["summary"] = summary_obj
 
     return result
@@ -188,27 +201,30 @@ def summarize_with_gpt(text: str, sentence_count: int = 5, source: str = "text")
     """
     Summarize text into short sentences using GPT-3.5 model.
     """
+
     text = text[:14000]
-
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    # prompt = (
-    #     "Summarize the following text into {sentence_count} short sentences.\n\n"
-    #     'Text: """{text}""". List each sentence in bullet points.'
-    # )
-
     prompt = (
-        "In just {sentence_count} sentences, capture the heart of the {source} below. "
-        "Highlight what it's about, who it's for, and why it might be interesting.\n\n"
-        "Text: {text}. List each sentence in bullet points."
+        "In just {sentence_count} sentences, capture the heart of the {source} text below. "
+        "Highlight what it's about, who it's for, and why it might be interesting. "
+        "Respond with a JSON object having the following keys: 'status': a boolean value, "
+        "'title': title of the {source}, 'sentences': array of sentences."
+        "The length of the 'sentences' array must be  {sentence_count} and respond "
+        "with a JSON object only without any additional text.\n\n"
+        'TEXT: """{text}"""'
     )
     prompt = prompt.format(text=text, sentence_count=sentence_count, source=source)
 
-    completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        seed=34267,
-    )
-    summary = completion.choices[0].message.content
+    try:
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            seed=34267,
+        )
+        summary = completion.choices[0].message.content
+    except Exception as e:
+        print(e)  # TODO: add logging
+        summary = None
     return summary
 
 
@@ -217,18 +233,27 @@ def summarize_with_gemini(text: str, sentence_count: int = 5, source: str = "tex
     Summarize text into short sentences using Gemini Pro model.
     """
     text = text[:14000]
-
     prompt = (
-        "In just {sentence_count} sentences, capture the heart of the {source} below. "
-        "Highlight what it's about, who it's for, and why it might be interesting.\n\n"
-        "Text: {text}. List each sentence in bullet points."
+        "In just {sentence_count} sentences, capture the heart of the {source} text below. "
+        "Highlight what it's about, who it's for, and why it might be interesting."
+        "Respond with a JSON object having the following keys: 'status': a boolean value, "
+        "'title': title of the {source}, 'sentences': array of sentences."
+        "The length of the 'sentences' array must be  {sentence_count} and respond "
+        "with a JSON object only without any additional text.\n\n"
+        'TEXT: """{text}"""'
     )
     prompt = prompt.format(text=text, sentence_count=sentence_count, source=source)
 
-    model = genai.GenerativeModel("gemini-pro")
-    response = model.generate_content(prompt)
-    summary = response.text
-
+    try:
+        model = genai.GenerativeModel("gemini-pro")
+        response = model.generate_content(prompt)
+        summary = response.text
+        # returns unnecessary text sometimes
+        summary = summary.replace("```JSON", "").replace("```json", "")
+        summary = summary.replace("```", "")
+    except Exception as e:
+        print(e)  # TODO: add logging
+        summary = None
     return summary
 
 
