@@ -12,6 +12,11 @@
 </div>
 
 
+If you have ChatGPT Plus subscription, Skimmit is now available on GPT Store. Check out
+
+https://chat.openai.com/g/g-uNZCnqgvX-skimmit
+
+
 
 ## About The Project
 
@@ -22,7 +27,7 @@ The main goal of this project is to make content consumption effective. How?
 
 **Time Saver**: Instantly grasp key insights without the need to read the entire article or watch the whole video. 
 
-The AI summaries powered by GPT-3.5 save you valuable time, making information consumption efficient.
+The AI summaries powered by GPT-3.5 and Gemini Pro save you valuable time, making information consumption efficient.
 
 **Informed Choices**: Preview articles and videos before committing. Know what's inside and make informed decisions about what to read and watch. 
 
