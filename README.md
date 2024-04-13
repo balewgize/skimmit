@@ -1,65 +1,40 @@
-<!-- Simple back to top -->
-<a name="readme-top"></a>
-
 <br />
 <div align="center">
   <h3 align="center">Skimmit</h3>
   <p align="center">
-    Article and YouTube video summary from URL, powered by GPT-3.5 & Gemini Pro
+    Article and YouTube video summary from URL, powered by GPT-4 & Gemini Pro
     <br />
-    <a href="https://skimmit.onrender.com/">View Demo</a>
+    <a href="https://balewgize.app/summarize">View Demo</a>
   </p>
 </div>
 
 
-If you have ChatGPT Plus subscription, Skimmit is now available on GPT Store. Check out
-
-https://chat.openai.com/g/g-uNZCnqgvX-skimmit
-
+Skimmit is now available on <a href="https://chat.openai.com/g/g-uNZCnqgvX-skimmit"> *GPT Store* </a>
 
 
 ## About The Project
 
-<!-- Use relative path to reference images you want to use in the README -->
-[![Screenshot](static/images/screenshot.png?raw=true "Skimmit")](https://skimmit.onrender.com/)
-
 The main goal of this project is to make content consumption effective. How?
 
-**Time Saver**: Instantly grasp key insights without the need to read the entire article or watch the whole video. 
+- Quickly get the main idea of any article or video.
+- See a short preview to asses if it's worth your time.
+- Spend less time consuming, and more time doing.
 
-The AI summaries powered by GPT-3.5 and Gemini Pro save you valuable time, making information consumption efficient.
+<br />
 
-**Informed Choices**: Preview articles and videos before committing. Know what's inside and make informed decisions about what to read and watch. 
+### Why Skimmit?
 
-This will be helpful when there are dozens of articles and videos on the subject you're interested in but not sure which one to pick.
+I believe content is being consumed more than ever. So it's important to be selective and make the most of it. 
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+If you want to give a try, check out the web version at <a href="https://balewgize.app/">https://balewgize.app/</a>
 
-<!-- Features: What main functionalities you implemented in the project? -->
-### Features
-
-* Article summary from URL
-* YouTube video summary from URL
-* LLM for summarization: ```GPT-3.5``` & ```Gemini Pro``` 
-* User preference: LLM model choice and summary length 
-* Bookmark summaries for later reading
-* Dark/Light theme
-
-If you don't want to create an account, you can use the following guest credentials.
-
-Email: ```guest@example.com``` <br>
-Password: ```welc0me2```
 
 <!-- What tech stack you use to develop the project? -->
 ### Built With
 
 * Python
-* Django
-* LLM (GPT-3.5, Gemini Pro)
-* Bootstrap
-* Render
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+* Flask
+* LLM (GPT-4 & Gemini Pro)
 
 
 
@@ -72,9 +47,7 @@ To get a local copy up and running follow these example steps.
 ### Prerequisites
 
 * Python installed
-* OpenAI API key
 * Gemini Pro API key
-* Email service (or setting up Google app password for your Gmail)
 
 ### Installation
 
@@ -89,34 +62,16 @@ To get a local copy up and running follow these example steps.
    ```
    pip install -r requirements.txt
    ```
-3. Provide credentials in .env (example in .env.dev file)
+3. Provide Gemini API key in `.env` file
    ```
-   DJANGO_SECRET_KEY=
-   DJANGO_DEBUG=
-
-   DATABASE_URL= (managed PostgreSQL, optional)
-
-   OPENAI_API_KEY=
-   GOOGLE_API_KEY=
-
-   EMAIL_HOST=
-   EMAIL_HOST_USER=
-   EMAIL_HOST_PASSWORD=
+   GOOGLE_API_KEY=your-google-gemini-api-key
    ```
 
-4. Apply migrations and start the server. The server starts in production settings by default.
+4. Start the server.
    ```
-   export DJANGO_SETTINGS_MODULE=config.settings.local
+   flask run
    ```
-   ```
-   python manage.py migrate
-   ```
-   ```
-   python manage.py runserver
-   ```
-5. Goto http://127.0.0.1:8000 on your browser
+5. Goto http://127.0.0.1:5000 on your browser
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-Thanks!
+<br />
+Thanks for checking!
