@@ -1,6 +1,11 @@
 from typing import Optional
 
+import os
+import random
 import requests
+from bs4 import BeautifulSoup
+from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.formatters import TextFormatter
 
 
 headers = {
@@ -20,7 +25,9 @@ headers = {
 def get_user_agents(filename: str) -> Optional[list[str]]:
     """Read user agent list from file"""
     try:
-        with open(filename) as f:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        full_path = os.path.join(current_dir, filename)
+        with open(full_path) as f:
             user_agents = f.read().splitlines()
     except Exception as e:
         user_agents = None
@@ -36,7 +43,7 @@ def download_page(url: str) -> tuple[requests.Response, bool]:
     error = False
     try:
         if user_agents:
-            headers["user-agent"] = user_agents[0]
+            headers["user-agent"] = random.choice(user_agents)
 
         response = requests.get(url, headers=headers)
         response.raise_for_status()
@@ -45,3 +52,28 @@ def download_page(url: str) -> tuple[requests.Response, bool]:
         error = True
 
     return response, error
+
+
+def get_article_text(url: str) -> str:
+    """Get article text from URL"""
+    response, error = download_page(url)
+    if error:
+        return ""
+
+    # TODO: remove unimportant tags like header and footer
+    soup = BeautifulSoup(response.text, "html.parser")
+    article_text = soup.find("body").get_text()
+    return article_text
+
+
+def get_youtube_transcript(url: str) -> str:
+    """Get YouTube transcript from URL"""
+    source_text = ""
+    try:
+        video_id = url.split("v=")[1].split("&")[0]
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        formatter = TextFormatter()
+        source_text = formatter.format_transcript(transcript)
+    except Exception as e:
+        print(e)
+    return source_text
