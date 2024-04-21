@@ -18,7 +18,7 @@ def index():
 @app.route("/summarize", methods=["GET", "POST"])
 def skimmit():
     if request.method == "GET":
-        return render_template("skimmit.html")
+        return render_template("index.html")
 
     elif request.method == "POST":
         data = request.get_json()
