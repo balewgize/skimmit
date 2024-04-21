@@ -3,6 +3,7 @@ from typing import Optional
 import os
 import random
 import requests
+import logging
 from bs4 import BeautifulSoup
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
@@ -42,13 +43,14 @@ def download_page(url: str) -> tuple[requests.Response, bool]:
     user_agents = get_user_agents(filename)
     error = False
     try:
+        logging.info(f"Getting page content from {url}")
         if user_agents:
             headers["user-agent"] = random.choice(user_agents)
 
         response = requests.get(url, headers=headers)
         response.raise_for_status()
     except Exception as e:
-        print(e, response.status_code)
+        logging.error(e, response.status_code)
         error = True
 
     return response, error
@@ -70,10 +72,11 @@ def get_youtube_transcript(url: str) -> str:
     """Get YouTube transcript from URL"""
     source_text = ""
     try:
+        logging.info(f"Getting YouTube transcript from {url}")
         video_id = url.split("v=")[1].split("&")[0]
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         formatter = TextFormatter()
         source_text = formatter.format_transcript(transcript)
     except Exception as e:
-        print(e)
+        logging.error(e)
     return source_text

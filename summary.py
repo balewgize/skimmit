@@ -1,8 +1,8 @@
 import os
 import json
+import logging
 from dotenv import load_dotenv
 import google.generativeai as genai
-
 
 load_dotenv()
 
@@ -42,9 +42,10 @@ def summarize_text(text, source):
             prompt, generation_config={"response_mime_type": "application/json"}
         )
         summary = json.loads(response.text)
+        logging.info("Valid JSON summary returned by the API.")
     except json.JSONDecodeError as e:
-        print("Invalid JSON returned by the API:", e)
+        logging.error("Invalid JSON returned by the API:", e)
     except Exception as e:
-        print("Error while summarizing:", e)  # TODO: add logging
+        logging.error("Error while summarizing:", e)  # TODO: add logging
 
     return summary

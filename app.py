@@ -7,7 +7,12 @@ from .summary import summarize_text
 app = Flask(__name__)
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    filename="app.log",
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 @app.route("/")
