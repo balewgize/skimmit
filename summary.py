@@ -1,5 +1,4 @@
 import os
-import re
 import json
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -7,10 +6,8 @@ import google.generativeai as genai
 
 load_dotenv()
 
-print("GOOGLE_API_KEY", os.environ.get("GOOGLE_API_KEY"))
 
-
-def summarize(text, source):
+def summarize_text(text, source):
     text = text[:14000]
     part_one = (
         "In just 5 sentences, capture the heart of the {source} text below. "
@@ -40,13 +37,13 @@ def summarize(text, source):
     summary = None
     try:
         genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
-        model = genai.GenerativeModel("gemini-pro")
-        response = model.generate_content(prompt).text
-        match = re.search(r"\{[^{}]*\}", response, re.IGNORECASE)
-        if match:
-            summary = json.loads(match.group(0).strip())
+        model = genai.GenerativeModel("gemini-1.5-pro-latest")
+        response = model.generate_content(
+            prompt, generation_config={"response_mime_type": "application/json"}
+        )
+        summary = json.loads(response.text)
     except json.JSONDecodeError as e:
-        print("Error parsing JSON:", e)
+        print("Invalid JSON returned by the API:", e)
     except Exception as e:
         print("Error while summarizing:", e)  # TODO: add logging
 

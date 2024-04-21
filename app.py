@@ -2,7 +2,7 @@ import logging
 from flask import Flask, request, jsonify, make_response, render_template
 
 from .utils.downloader import get_article_text, get_youtube_transcript
-from .utils.summary import summarize
+from .summary import summarize_text
 
 app = Flask(__name__)
 
@@ -33,7 +33,7 @@ def skimmit():
         else:
             return make_response(jsonify({"error": "Invalid source type"}), 400)
 
-        summary = summarize(source_text, source_type)
+        summary = summarize_text(source_text, source_type)
         return jsonify(summary), 200
 
 
