@@ -4,7 +4,7 @@ import os
 import random
 import requests
 import logging
-from newspaper import Article
+from bs4 import BeautifulSoup
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
 
@@ -57,16 +57,33 @@ def download_page(url: str) -> Optional[str]:
     return content
 
 
+def clean_html(soup: BeautifulSoup) -> BeautifulSoup:
+    unwanted_tags = [
+        "script",
+        "style",
+        "noscript",
+        "nav",
+        "header",
+        "footer",
+        "form",
+        "aside",
+    ]
+    for tag in soup(unwanted_tags):
+        tag.decompose()
+    return soup
+
+
 def get_article_text(url: str) -> str:
     """Get article text from URL"""
     raw_content = download_page(url)
     if raw_content is None:
         return ""
 
-    article = Article(url)
-    article.download(input_html=raw_content)
-    article.parse()
-    return article.text
+    soup = BeautifulSoup(raw_content, "html.parser")
+    soup = clean_html(soup)
+    article_text = " ".join(soup.stripped_strings)
+
+    return article_text
 
 
 def get_youtube_transcript(url: str) -> str:

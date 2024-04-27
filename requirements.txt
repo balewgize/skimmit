@@ -3,5 +3,3 @@ youtube_transcript_api==0.6.2
 beautifulsoup4==4.12.2
 python-dotenv==1.0.1
 google-generativeai==0.5.2
-newspaper4k==0.9.3.1
-lxml-html-clean==0.1.1
