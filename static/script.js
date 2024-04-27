@@ -7,6 +7,22 @@ const resultDiv = document.getElementById('result');
 const loadingDiv = document.getElementById('loading');
 const noSummaryMessage = "Oops! Something went wrong. Please try again (or use a different link)."
 
+// handle theme change
+const toggleTheme = document.getElementById('toggle-theme');
+
+toggleTheme.addEventListener('click', () => {
+    const currentTheme = localStorage.getItem('skTheme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    document.documentElement.setAttribute('data-bs-theme', newTheme);
+    localStorage.setItem('skTheme', newTheme);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('skTheme') || 'light'; // Default to light theme
+    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+});
+
 
 const fetchSummary = (url, source) => {
     showLoadingText();
