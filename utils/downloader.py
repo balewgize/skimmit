@@ -4,7 +4,7 @@ import os
 import random
 import requests
 import logging
-from bs4 import BeautifulSoup
+from newspaper import Article
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
 
@@ -36,12 +36,13 @@ def get_user_agents(filename: str) -> Optional[list[str]]:
     return user_agents
 
 
-def download_page(url: str) -> tuple[requests.Response, bool]:
+def download_page(url: str) -> Optional[str]:
     """Download HTML page from URL"""
 
     filename = "user_agents.txt"
     user_agents = get_user_agents(filename)
-    error = False
+    content = None
+
     try:
         logging.info(f"Getting page content from {url}")
         if user_agents:
@@ -49,23 +50,23 @@ def download_page(url: str) -> tuple[requests.Response, bool]:
 
         response = requests.get(url, headers=headers)
         response.raise_for_status()
+        content = response.text
     except Exception as e:
         logging.error(e, response.status_code)
-        error = True
 
-    return response, error
+    return content
 
 
 def get_article_text(url: str) -> str:
     """Get article text from URL"""
-    response, error = download_page(url)
-    if error:
+    raw_content = download_page(url)
+    if raw_content is None:
         return ""
 
-    # TODO: remove unimportant tags like header and footer
-    soup = BeautifulSoup(response.text, "html.parser")
-    article_text = soup.find("body").get_text()
-    return article_text
+    article = Article(url)
+    article.download(input_html=raw_content)
+    article.parse()
+    return article.text
 
 
 def get_youtube_transcript(url: str) -> str:
@@ -73,7 +74,11 @@ def get_youtube_transcript(url: str) -> str:
     source_text = ""
     try:
         logging.info(f"Getting YouTube transcript from {url}")
-        video_id = url.split("v=")[1].split("&")[0]
+        if "youtu.be" in url:
+            video_id = url.split("be/")[1].split("?")[0]
+        else:
+            video_id = url.split("v=")[1].split("&")[0]
+
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         formatter = TextFormatter()
         source_text = formatter.format_transcript(transcript)
