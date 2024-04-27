@@ -42,10 +42,12 @@ def summarize_text(text, source):
             prompt, generation_config={"response_mime_type": "application/json"}
         )
         summary = json.loads(response.text)
-        logging.info("Valid JSON summary returned by the API.")
+        logging.info("Summary generated successfully.")
     except json.JSONDecodeError as e:
-        logging.error("Invalid JSON returned by the API:", e)
+        logging.error("Invalid JSON returned by the API.")
+        logging.exception(e)
     except Exception as e:
-        logging.error("Error while summarizing:", e)  # TODO: add logging
+        logging.error("Failed to generate summary.")
+        logging.exception(e)
 
     return summary

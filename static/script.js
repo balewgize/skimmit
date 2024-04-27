@@ -31,7 +31,7 @@ const fetchSummary = (url, source) => {
             showResult(data, url);
         })
         .catch(error => {
-            console.error('There was a problem with your fetch operation:', error);
+            // console.error('There was a problem with your fetch operation:', error);
             resultDiv.innerHTML = noSummaryMessage;
             loadingDiv.classList.add('d-none');
         });
@@ -80,7 +80,6 @@ articleForm.addEventListener('submit', (event) => {
     event.preventDefault();
 
     resultDiv.innerHTML = '';
-    // TODO: do input validation
     const articleUrl = articleInput.value;
     fetchSummary(articleUrl, "article");
 });
@@ -89,7 +88,14 @@ videoForm.addEventListener('submit', (event) => {
     event.preventDefault();
 
     resultDiv.innerHTML = '';
-    // TODO: do input validation
     const videoUrl = videoInput.value;
+    // Regular expression to validate YouTube URL (standard and shortened)
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}.*/;
+
+    if (!youtubeRegex.test(videoUrl)) {
+        resultDiv.innerHTML = 'Please enter a valid YouTube URL.';
+        return;
+    }
+
     fetchSummary(videoUrl, "video");
 });
