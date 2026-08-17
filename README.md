@@ -1,3 +1,5 @@
+
+
 <br />
 <div align="center">
   <h3 align="center">Skimmit</h3>
@@ -17,7 +19,7 @@ Skimmit is now available on <a href="https://chat.openai.com/g/g-uNZCnqgvX-skimm
 The main goal of this project is to make content consumption effective. How?
 
 - Quickly get the main idea of any article or video.
-- See a short preview to asses if it's worth your time.
+- See a short preview to assess if it's worth your time.
 - Spend less time consuming, and more time doing.
 
 <br />
